@@ -50,9 +50,5 @@ const splashIsPresent = (gameWindow: WowWindow, config: Wow.Fish.Splash.Config, 
 		}
 	}
 
-	console.log("Best " + best)
-	if (count > 0)
-		console.log("Count " + count)
-
 	return count >= config.counter;
 }

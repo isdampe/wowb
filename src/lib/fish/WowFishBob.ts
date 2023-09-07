@@ -34,34 +34,6 @@ export class WowFishBob {
 			]
 		};
 
-		this.gameWindow.moveMouseTo({
-			x: relativeBoundaries.x[0],
-			y: relativeBoundaries.y[0]
-		});
-
-		await sleep(250);
-
-		this.gameWindow.moveMouseTo({
-			x: relativeBoundaries.x[1],
-			y: relativeBoundaries.y[0]
-		})
-
-		await sleep(250);
-
-		this.gameWindow.moveMouseTo({
-			x: relativeBoundaries.x[1],
-			y: relativeBoundaries.y[1]
-		})
-
-		await sleep(250);
-
-		this.gameWindow.moveMouseTo({
-			x: relativeBoundaries.x[0],
-			y: relativeBoundaries.y[1]
-		})
-
-		await sleep(250);
-
 		let bestMatch = 0;
 
 		const position: Wow.Window.Position = {x: -1, y: -1};
@@ -83,7 +55,6 @@ export class WowFishBob {
 
 
 		this.position = position;
-		console.log(this.position)
 		return position.x !== -1 && position.y !== -1;
 	}
 

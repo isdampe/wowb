@@ -60,8 +60,10 @@ class WowFish {
 		console.log("Launching. Please activate the game window.");
 		await sleep(2000);
 
-		while (true)
+		while (true) {
 			await this.loop(this.getRandomMethod());
+			await sleep(250);
+		}
 
 	}
 
@@ -80,7 +82,6 @@ class WowFish {
 		}
 
 		this.log(`Found bob at ${bob.position.x}, ${bob.position.y}`);
-		this.window.moveMouseTo(bob.position);
 
 		this.log(`Waiting to catch`);
 		const foundSplash = await this.waitAndLoot(method, bob);
@@ -89,17 +90,9 @@ class WowFish {
 			return;
 		}
 
-		this.log(`Looted! Check if we succeeded...`);
-		const noFish = detectNoFishHooked(this.window);
-		if (noFish) {
-			this.setStat(method, "failed", startTime);
-			return;
-		}
-
 		this.setStat(method, "succeeded", startTime);
 
 		this.log("Succeeded in catch, checking loot...");
-		await sleep(1000);
 
 	}
 
@@ -136,9 +129,11 @@ class WowFish {
 			y: bob.position.y
 		});
 
-		await sleep(250);
-
+		await sleep(150);
 		this.window.rightClick();
+
+		return true;
+
 	}
 
 	setStat(method: Wow.Fish.Method, context: "succeeded" | "failed" | "timedOut" | "couldNotFindBob", startTime: Date, qty = 1) {
@@ -183,8 +178,8 @@ if (require.main === module) {
 						g: 249,
 						b: 246
 					},
-					similarityThreshold: 0.58,
-					counter: 5
+					similarityThreshold: 0.65,
+					counter: 30
 				}
 			}
 		}
