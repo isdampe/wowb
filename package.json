@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "./node_modules/.bin/tsc -p tsconfig.json",
-    "fish": "node dist/WowFish.js"
+    "fish": "node dist/WowFishNew.js"
   },
   "keywords": [],
   "author": "",
