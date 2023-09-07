@@ -4,12 +4,14 @@ import { WowFishBob } from "./lib/fish/WowFishBob";
 import fs from "fs";
 import { findSplash } from "./lib/fish/WowFishSplash";
 import { detectNoFishHooked } from "./lib/fish/WowFishSuccess";
+import { readLoot } from "./lib/fish/WowFishReadLoot";
 
 class WowFish {
 	private window: WowWindow;
 	private config: Wow.Fish.Config;
 	private stats: Record<string, Wow.Fish.Stat>;
 	private sessionName: string;
+	private startTime: Date;
 
 	constructor(config: Wow.Fish.Config) {
 		this.config = config;
@@ -57,6 +59,8 @@ class WowFish {
 
 	async main() {
 
+		this.startTime = new Date();
+
 		console.log("Launching. Please activate the game window.");
 		await sleep(2000);
 
@@ -93,6 +97,11 @@ class WowFish {
 		this.setStat(method, "succeeded", startTime);
 
 		this.log("Succeeded in catch, checking loot...");
+
+		await this.checkLoot(method);
+
+		console.log(JSON.stringify(this.computeStats(), null, 2))
+		console.log(`Loot per hour (${method.name}): ${this.computeHourlyRate(method)}`)
 
 	}
 
@@ -136,16 +145,45 @@ class WowFish {
 
 	}
 
+	async checkLoot(method: Wow.Fish.Method) {
+		this.window.pressKey(this.config.keyBindings.clearChat);
+		await sleep(250);
+		
+		const found = await readLoot(this.window, method.lootConfig);
+		if (found) {
+			console.log("Found loot, writing stats");
+			this.stats[method.name].loot.qty++;
+			this.writeStat();
+		}
+	}
+
 	setStat(method: Wow.Fish.Method, context: "succeeded" | "failed" | "timedOut" | "couldNotFindBob", startTime: Date, qty = 1) {
 		const timeSpent = Date.now() - startTime.getTime();
 		this.log(`Setting stat for ${method.name} ${context}, time spent: ${timeSpent}ms`);
 
 		this.stats[method.name].casts[context].timeSpent += timeSpent;
 		this.stats[method.name].casts[context].qty += qty;
+		this.writeStat();
+	}
+
+	computeStats() {
+		return {
+			stats: this.stats,
+			startTime: this.startTime.toISOString(),
+			endTime: new Date().toISOString(),
+			durationMinutes: Math.round((Date.now() - this.startTime.getTime()) / 1000 / 60)
+		};
+	}
+
+	computeHourlyRate(method: Wow.Fish.Method) {
+		// Determine loot per minute
+		const stats = this.computeStats();
+		const lootPerMinute = stats.stats[method.name].loot.qty / stats.durationMinutes;
+		return lootPerMinute * 60;
 	}
 
 	writeStat() {
-		fs.promises.writeFile(`./stats/${this.sessionName}.json`, JSON.stringify(this.stats, null, 2))
+		fs.promises.writeFile(`./stats/${this.sessionName}.json`, JSON.stringify(this.computeStats(), null, 2))
 			.catch(err => {
 				this.log(`Error writing stat: ${err}`);
 			});
@@ -180,6 +218,15 @@ if (require.main === module) {
 					},
 					similarityThreshold: 0.65,
 					counter: 30
+				},
+				lootConfig: {
+					color: {
+						r: 244,
+						g: 251,
+						b: 53
+					},
+					similarityThreshold: 0.9,
+					counter: 20
 				}
 			}
 		}

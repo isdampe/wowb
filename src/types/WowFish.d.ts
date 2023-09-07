@@ -3,6 +3,7 @@ declare namespace Wow.Fish {
 		name: string;
 		bobConfig: Wow.Fish.Bob.Config;
 		splashConfig: Wow.Fish.Splash.Config;
+		lootConfig: Wow.Fish.ReadLoot.Config;
 	};
 
 	type Config = {
