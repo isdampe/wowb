@@ -1,10 +1,9 @@
 import { sleep } from "./lib/WowSleep";
 import { WowWindow } from "./lib/WowWindow";
 import { WowFishBob } from "./lib/fish/WowFishBob";
-import fs from "fs";
 import { findSplash } from "./lib/fish/WowFishSplash";
-import { detectNoFishHooked } from "./lib/fish/WowFishSuccess";
 import { readLoot } from "./lib/fish/WowFishReadLoot";
+import fs from "fs";
 
 class WowFish {
 	private window: WowWindow;
