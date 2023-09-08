@@ -21,7 +21,6 @@ export const findSplash = async (gameWindow: WowWindow, config: Wow.Fish.Splash.
 	};
 
 	const startTime = Date.now();
-	console.log(relativeBoundaries)
 	while (Date.now() - startTime < 15000) {
 		if (splashIsPresent(gameWindow, config, relativeBoundaries))
 			return true;

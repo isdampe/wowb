@@ -81,6 +81,12 @@ class WowFish {
 		const bob = await this.findBob(method);
 		if (! bob) {
 			this.setStat(method, "couldNotFindBob", startTime);
+			this.writeOutcome({
+				outcome: "couldNotFindBob",
+				loot: 0,
+				method: method.name,
+				startTime
+			});
 			return;
 		}
 
@@ -90,6 +96,12 @@ class WowFish {
 		const foundSplash = await this.waitAndLoot(method, bob);
 		if (! foundSplash) {
 			this.setStat(method, "timedOut", startTime);
+			this.writeOutcome({
+				outcome: "timedOut",
+				loot: 0,
+				method: method.name,
+				startTime
+			});
 			return;
 		}
 
@@ -97,7 +109,13 @@ class WowFish {
 
 		this.log("Succeeded in catch, checking loot...");
 
-		await this.checkLoot(method);
+		const foundLoot = await this.checkLoot(method);
+		this.writeOutcome({
+			outcome: "success",
+			loot: foundLoot ? 1 : 0,
+			method: method.name,
+			startTime
+		});
 
 		console.log(JSON.stringify(this.computeStats(), null, 2))
 		console.log(`Loot per hour (${method.name}): ${this.computeHourlyRate(method)}`)
@@ -154,6 +172,8 @@ class WowFish {
 			this.stats[method.name].loot.qty++;
 			this.writeStat();
 		}
+
+		return found;
 	}
 
 	setStat(method: Wow.Fish.Method, context: "succeeded" | "failed" | "timedOut" | "couldNotFindBob", startTime: Date, qty = 1) {
@@ -186,6 +206,18 @@ class WowFish {
 			.catch(err => {
 				this.log(`Error writing stat: ${err}`);
 			});
+	}
+
+	writeOutcome(args: {
+		method: string,
+		outcome: string,
+		loot: number,
+		startTime: Date,
+	}) {
+		fs.promises.appendFile(`./stats/${this.sessionName}.csv`, `${args.method},${args.outcome},${args.startTime.toISOString()},${new Date().toISOString()},${args.loot},${Date.now() - args.startTime.getTime()}\n`, {encoding: "utf8"})
+			.catch(err => {
+				this.log(`Error writing outcome: ${err}`);
+			})
 	}
 
 }

@@ -44,7 +44,6 @@ export class WowFishBob {
 				const diff = compareColors(color, this.config.color);
 				if (diff > this.config.similarityThreshold) {
 					if (diff > bestMatch) {
-						console.log(bestMatch, x, y, color, this.config.color)
 						bestMatch = diff;
 						position.x = x;
 						position.y = y;
