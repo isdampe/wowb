@@ -197,15 +197,18 @@ class WowFish {
 	computeHourlyRate(method: Wow.Fish.Method) {
 		// Determine loot per minute
 		const stats = this.computeStats();
-		const lootPerMinute = stats.stats[method.name].loot.qty / stats.durationMinutes;
+		const totalLootQty = Object.values(stats.stats).reduce((acc, methodStats) => acc + methodStats.loot.qty, 0);
+		const lootPerMinute = totalLootQty / (stats.durationMinutes || 1);
 		return lootPerMinute * 60;
 	}
 
 	writeStat() {
-		fs.promises.writeFile(`./stats/${this.sessionName}.json`, JSON.stringify(this.computeStats(), null, 2))
-			.catch(err => {
-				this.log(`Error writing stat: ${err}`);
-			});
+		for (const file of [`./stats/${this.sessionName}.json`, `./stats/current.json`]) {
+			fs.promises.writeFile(file, JSON.stringify(this.computeStats(), null, 2))
+				.catch(err => {
+					this.log(`Error writing stat: ${err}`);
+				});
+		}
 	}
 
 	writeOutcome(args: {
@@ -231,8 +234,8 @@ if (require.main === module) {
 			clearChat: "2"
 		},
 		methods: {
-			methodB: {
-				name: "methodB",
+			modified: {
+				name: "modified",
 				bobConfig: {
 					color: {
 						r: 59,
@@ -248,7 +251,7 @@ if (require.main === module) {
 						b: 246
 					},
 					similarityThreshold: 0.65,
-					counter: 30
+					counter: 20
 				},
 				lootConfig: {
 					color: {
